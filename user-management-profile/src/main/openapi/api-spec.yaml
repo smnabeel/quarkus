@@ -1,0 +1,159 @@
+openapi: 3.0.0
+info:
+  title: API for User Management - User Profile Information
+  description: API for User Management - User Profile Information
+  version: 1.0.0
+servers:
+  - url: /user/management/api/v1
+    description: Base Endpoint
+tags:
+  - name: User Authentication
+    description: API for user authentication
+paths:
+  /user/{user-id}/profile:
+    parameters:
+      - $ref: '#/components/parameters/Accept'
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/user-id'
+    get:
+      tags:
+        - User Profile
+      description: Get user profile information
+      operationId: getUserProfileInformation
+      responses:
+        '200':
+          description: The request has been successfully processed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfileInfoModel'
+        '400':
+          $ref: '#/components/responses/Response400'
+        '404':
+          $ref: '#/components/responses/Response404'
+        '409':
+          $ref: '#/components/responses/Response409'
+        '500':
+          $ref: '#/components/responses/Response500'
+        '501':
+          $ref: '#/components/responses/Response501'
+        '503':
+          $ref: '#/components/responses/Response503'       
+components:
+  schemas:
+    ErrorModel:
+      type: object
+      required:
+        - errorCategory
+        - errorCode
+        - errorMessage
+      properties:
+        errorCategory:
+          type: string
+          example: ECXXXX00
+        errorCode:
+          type: string
+          example: EXXXX000
+        errorMessage:
+          $ref: '#/components/schemas/LocaleDataModel'
+    ErrorListModel:
+      type: object
+      properties:
+        errorModelList:
+          type: array
+          items:
+            $ref: '#/components/schemas/ErrorModel'
+    LanguageModel:
+      type: string
+      description: The language to be used in this context
+      enum:
+        - ar-SA
+        - en-US
+      example: "ar-SA"
+    LocaleDataModel:
+      type: object
+      additionalProperties:
+        type: string
+      example:
+        "en-US": "English Value"
+        "ar-SA": "Arabic Value" 
+    UserIdModel:
+      type: string
+      pattern: '(1|2)\d{9}'
+      description: "This user id object will be used across the model with format 1* and 2* with length of 10"
+      example: '1129184279'
+    UserProfileInfoModel:
+      type: object
+      properties:
+        userId:
+          $ref: '#/components/schemas/UserIdModel'
+        fullName:
+          $ref: '#/components/schemas/LocaleDataModel'
+        dob:
+          type: string
+          example: "01-JAN-1971"
+        mobileNumber:
+          type: string
+          example: "0512345678"
+        occupation:
+          $ref: '#/components/schemas/LocaleDataModel'
+  parameters:
+    user-id:
+      in: path
+      name: user-id
+      description: The citizen id or resident id
+      required: true
+      schema:
+        $ref: "#/components/schemas/UserIdModel"
+    Content-Type:
+      in: header
+      name: Content-Type
+      description: The content type sent by the client
+      required: true
+      schema:
+        type: string
+        example: "application/json"
+    Accept:
+      in: header
+      name: Accept
+      description: The content type accepted by the client
+      required: true
+      schema:
+        type: string
+        example: "application/json"
+    Accept-Language:
+      in: header
+      name: Accept-Language
+      description: The language localization to be used on the response
+      required: true
+      schema:
+        $ref: '#/components/schemas/LanguageModel'
+  responses:
+    Response201:
+      description: The request has been successfully processed.
+    Response204:
+      description: The request has been successfully processed.
+    Response400:
+      description: The request was rejected by the server due to malformed syntax. Bad Request.
+    Response404:
+      description: The server has not found anything matching the Request-URI. 
+    Response409:
+      description: The request could not be completed due to a conflict with the current state of the resource. Usually business validation errors will be returned in the body
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorListModel'
+    Response500:
+      description: The server encountered an unexpected condition which prevented it from fulfilling the request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorListModel'  
+    Response501:
+      description: The server does not support the functionality required to fulfill the request.
+    Response503:
+      description: The server is currently unable to handle the request due to unavailability of external dependency.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorListModel'
